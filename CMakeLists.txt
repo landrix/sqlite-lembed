@@ -32,7 +32,7 @@ include_directories(${SQLITE_AMALGAMATION_DIR})
 
 add_library(sqlite_lembed SHARED sqlite-lembed.c)
 add_dependencies(sqlite_lembed sqlite_amalgamation)
-target_link_libraries(sqlite_lembed ggml_static llama)
+target_link_libraries(sqlite_lembed ggml llama)
 target_include_directories(sqlite_lembed PRIVATE ${LLAMA_CPP_DIR})
 set_target_properties(sqlite_lembed PROPERTIES PREFIX "")
 set_target_properties(sqlite_lembed PROPERTIES OUTPUT_NAME "lembed0")
