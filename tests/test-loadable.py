@@ -35,6 +35,7 @@ def connect(ext, path=":memory:", extra_entrypoint=None):
     return db
 
 
+
 db = connect(EXT_PATH)
 
 
@@ -142,82 +143,102 @@ def test_lembed():
     )
 
 
-@pytest.mark.skip(reason="TODO")
 def test__lembed_api():
+    # _lembed_api is an internal noop entrypoint; ensure it exists and is callable
     _lembed_api = lambda *args: db.execute("select _lembed_api()", args).fetchone()[0]
-    pass
+    # calling should not raise
+    _lembed_api()
 
 
-@pytest.mark.skip(reason="TODO")
 def test_lembed_context_options():
-    lembed_context_options = lambda *args: db.execute(
-        "select lembed_context_options()", args
-    ).fetchone()[0]
-    pass
+    # Ensure the context options factory returns a pointer-like object when called
+    r = db.execute("select lembed_context_options('n_ctx', 512)").fetchone()[0]
+    assert r is not None
 
 
-@pytest.mark.skip(reason="TODO")
 def test_lembed_model_size():
-    lembed_model_size = lambda *args: db.execute(
-        "select lembed_model_size()", args
+    db.execute(
+        "insert into temp.lembed_models(name, model) values (?, lembed_model_from_file(?))",
+        ["size_test", MODEL1_PATH],
+    )
+    size = db.execute(
+        "select lembed_model_size(model) from temp.lembed_models where name = ?",
+        ["size_test"],
     ).fetchone()[0]
-    pass
+    assert isinstance(size, int)
+    assert size > 0
 
 
-@pytest.mark.skip(reason="TODO")
 def test_lembed_model_from_file():
-    lembed_model_from_file = lambda *args: db.execute(
-        "select lembed_model_from_file()", args
-    ).fetchone()[0]
-    pass
+    p = db.execute("select lembed_model_from_file(?)", [MODEL1_PATH]).fetchone()[0]
+    assert p is not None
 
 
-@pytest.mark.skip(reason="TODO")
 def test_lembed_model_options():
-    lembed_model_options = lambda *args: db.execute(
-        "select lembed_model_options()", args
-    ).fetchone()[0]
-    pass
+    r = db.execute("select lembed_model_options('n_gpu_layers', 0)").fetchone()[0]
+    assert r is not None
 
 
-@pytest.mark.skip(reason="TODO")
 def test_lembed_tokenize_json():
-    lembed_tokenize_json = lambda *args: db.execute(
-        "select lembed_tokenize_json()", args
-    ).fetchone()[0]
-    pass
+    db.execute(
+        "insert into temp.lembed_models(name, model) values (?, lembed_model_from_file(?))",
+        ["tok", MODEL1_PATH],
+    )
+    s = db.execute("select lembed_tokenize_json(?, ?)", ["tok", "hello world"]).fetchone()[0]
+    import json
+    tokens = json.loads(s)
+    assert isinstance(tokens, list)
+    assert len(tokens) > 0
+    assert all(isinstance(t, int) for t in tokens)
 
 
-@pytest.mark.skip(reason="TODO")
 def test_lembed_token_score():
-    lembed_token_score = lambda *args: db.execute(
-        "select lembed_token_score()", args
-    ).fetchone()[0]
-    pass
+    db.execute(
+        "insert into temp.lembed_models(name, model) values (?, lembed_model_from_file(?))",
+        ["score", MODEL1_PATH],
+    )
+    s = db.execute("select lembed_tokenize_json(?, ?)", ["score", "hello"]).fetchone()[0]
+    import json
+    tokens = json.loads(s)
+    token = tokens[0]
+    score = db.execute("select lembed_token_score(?, ?)", ["score", token]).fetchone()[0]
+    assert isinstance(score, float)
 
 
-@pytest.mark.skip(reason="TODO")
 def test_lembed_token_to_piece():
-    lembed_token_to_piece = lambda *args: db.execute(
-        "select lembed_token_to_piece()", args
-    ).fetchone()[0]
-    pass
+    db.execute(
+        "insert into temp.lembed_models(name, model) values (?, lembed_model_from_file(?))",
+        ["piece", MODEL1_PATH],
+    )
+    s = db.execute("select lembed_tokenize_json(?, ?)", ["piece", "hello"]).fetchone()[0]
+    import json
+    tokens = json.loads(s)
+    token = tokens[0]
+    piece = db.execute("select lembed_token_to_piece(?, ?)", ["piece", token]).fetchone()[0]
+    assert isinstance(piece, str)
+    assert len(piece) > 0
 
 
-@pytest.mark.skip(reason="TODO")
 def test_lembed_chunks():
-    lembed_chunks = lambda *args: db.execute(
-        "select * from lembed_chunks()", args
-    ).fetchone()[0]
-    pass
+    db.execute(
+        "insert into temp.lembed_models(name, model) values (?, lembed_model_from_file(?))",
+        ["chunky", MODEL1_PATH],
+    )
+    # Query the virtual table; module expects (model_name, text)
+    rows = db.execute("select contents from lembed_chunks(?, ?)", ["chunky", "The quick brown fox jumps over the lazy dog"]).fetchall()
+    assert len(rows) > 0
+    assert all(' ' in r[0] or len(r[0]) > 0 for r in rows)
 
 
-@pytest.mark.skip(reason="TODO")
 def test_lembed_models():
-    lembed_models = lambda *args: db.execute(
-        "select * from lembed_chunks()", args
-    ).fetchone()[0]
-    pass
+    # Ensure lembed_models virtual table reflects inserted models
+    db.execute(
+        "insert into temp.lembed_models(name, model) values (?, lembed_model_from_file(?))",
+        ["m1", MODEL1_PATH],
+    )
+    rows = db.execute("select name from temp.lembed_models").fetchall()
+    names = [r[0] for r in rows]
+    assert 'm1' in names
 
 
 def test_coverage():
