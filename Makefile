@@ -25,6 +25,13 @@ CFLAGS+=-framework Accelerate -framework Foundation -framework Metal -framework 
 LLAMA_CMAKE_FLAGS+=-DLLAMA_METAL=0
 endif
 
+ifeq ($(shell uname -sm),Darwin x86_64)
+LLAMA_CMAKE_FLAGS+=-DCMAKE_OSX_ARCHITECTURES=x86_64
+endif
+ifeq ($(shell uname -sm),Darwin arm64)
+LLAMA_CMAKE_FLAGS+=-DCMAKE_OSX_ARCHITECTURES=arm64
+endif
+
 ifdef CONFIG_LINUX
 LOADABLE_EXTENSION=so
 LLAMA_CMAKE_FLAGS+=-DCMAKE_POSITION_INDEPENDENT_CODE=ON

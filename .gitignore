@@ -10,3 +10,7 @@ ggml-metal.metal
 News*.json
 sqlite-lembed.h
 dist/
+build/
+build-*/
+
+tests/__pycache__/
