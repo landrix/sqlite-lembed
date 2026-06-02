@@ -147,6 +147,25 @@ struct Api {
 
 void api_free(void *p) {
   struct Api *a = (struct Api *)p;
+  if (!a) {
+    return;
+  }
+
+  for (int i = 0; i < MAX_MODELS; i++) {
+    if (a->models[i].context) {
+      llama_free(a->models[i].context);
+      a->models[i].context = NULL;
+    }
+    if (a->models[i].model) {
+      llama_model_free(a->models[i].model);
+      a->models[i].model = NULL;
+    }
+    if (a->models[i].name) {
+      sqlite3_free(a->models[i].name);
+      a->models[i].name = NULL;
+    }
+  }
+
   llama_backend_free();
   sqlite3_free(a);
 }
