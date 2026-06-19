@@ -106,6 +106,12 @@ Most embeddings models out there are provided as PyTorch/ONNX models, but `sqlit
 | `nomic-embed-text-v1.5` | https://huggingface.co/nomic-ai/nomic-embed-text-v1.5-GGUF |
 | `mxbai-embed-large-v1`  | https://huggingface.co/mixedbread-ai/mxbai-embed-large-v1  |
 
+## Landrix Fork
+
+This repository is a fork of the upstream [`asg017/sqlite-lembed`](https://github.com/asg017/sqlite-lembed) project, adapted for use in [`sqlite-vec-for-Delphi`](https://github.com/landrix/sqlite-vec-for-Delphi). It is based on upstream `0.0.1-alpha.8` and carries the version tag `0.0.1-alpha.8-landrix.1`.
+
+Notable changes include an updated `llama.cpp`, a crash fix for long inputs, memory cleanup on shutdown, and Windows/macOS build improvements. See [`CHANGELOG.md`](CHANGELOG.md) for the full list.
+
 ## Drawbacks
 
 1. **No batch support yet.** `llama.cpp` has support for batch processing multiple inputs, but I haven't figured that out yet. Add a :+1: to [Issue #2](https://github.com/asg017/sqlite-lembed/issues/2) if you want to see this fixed.
